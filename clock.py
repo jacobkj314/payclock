@@ -23,24 +23,32 @@ with open(log_file) as file:
 				])
 	state = True if (len(log) > 0 and log[-1][-1] is None) else False #whether I am working or not
 
+def get_log():
+	if not state:
+		return log
+	current_entry = log[-1][:-1] + [datetime.datetime.now()]
+
+	return log[:-1] + [current_entry]
+
+def get_report():
+	log_to_report = get_log()
+	report = dict()
+	for date, start, end in log_to_report:
+		if date not in report.keys():
+			report[date] = 0.0
+		report[date] = report[date] + (end - start).seconds / 3600
+	return report
 
 while True:
 	command = input()
 	
 	if command == 'report':
-		log_to_report = log[:-1] if state else log
-		report = dict()
-		for date, start, end in log_to_report:
-			if date not in report.keys():
-				report[date] = 0.0
-			report[date] = report[date] + (end - start).seconds / 3600
-		for date, duration in report.items():
+		for date, duration in get_report().items():
 			print(f"{duration} hours worked on date {date}")
 	elif command == 'total':
-		log_to_report = log[:-1] if state else log
 		total = 0.0
-		for date, start, end in log_to_report:
-			total += (end - start).seconds / 3600
+		for _, duration in get_report().items():
+			total += duration
 		print(f"{total} hours worked since begin of log")
 	elif command == "state":
 		print(f"You are {('' if state else 'NOT ')}on the clock")
