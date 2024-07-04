@@ -36,6 +36,14 @@ while True:
 			report[date] = report[date] + (end - start).seconds / 3600
 		for date, duration in report.items():
 			print(f"{duration} hours worked on date {date}")
+	elif command == 'total':
+		log_to_report = log[:-1] if state else log
+		total = 0.0
+		for date, start, end in log_to_report:
+			total += (end - start).seconds / 3600
+		print(f"{total} hours worked since begin of log")
+	elif command == "state":
+		print(f"You are {('' if state else 'NOT ')}on the clock")
 	elif command == "exit":
 		break
 	else:
