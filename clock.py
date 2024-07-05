@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import datetime
 
 from sys import argv
@@ -40,7 +41,7 @@ def get_report():
 	return report
 
 while True:
-	command = input()
+	command = input('> ')
 	
 	if command == 'report':
 		for date, duration in get_report().items():
@@ -52,22 +53,28 @@ while True:
 		print(f"{total} hours worked since begin of log")
 	elif command == "state":
 		print(f"You are {('' if state else 'NOT ')}on the clock")
+	elif command == "clear":
+		print("\033[2J\033[H", end='')
 	elif command == "exit":
 		break
-	else:
+	elif command == '':
 		dt = datetime.datetime.now()
 		date, time = dt.strftime("%d %H%M").split(' ')
 		state = not state
 
 		if state: # if I just started
+			print("\033[F> start")
 			log.append([date, dt, None])
 			write(f"{date} {time}")
-			print(f"\033[FOn since {time}")
+			print(f"On since {time}")
 				
 		else:	#if I just ended
+			print("\033[F> end")
 			log[-1][-1] = dt
 			start_time = log[-1][1]
 			duration = (dt - start_time).seconds / 3600
 			write(f" {time}\n")
-			print(f"\033[FOff since {time}, after having worked {duration : .8f} hours")
+			print(f"Off since {time}, after having worked {duration : .8f} hours")
+	else:
+		print("unknown command")
 		
