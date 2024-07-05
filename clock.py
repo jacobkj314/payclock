@@ -62,12 +62,12 @@ while True:
 		if state: # if I just started
 			log.append([date, dt, None])
 			write(f"{date} {time}")
-			print(f"On since {time}", end='')
+			print(f"\033[FOn since {time}")
 				
 		else:	#if I just ended
 			log[-1][-1] = dt
 			start_time = log[-1][1]
 			duration = (dt - start_time).seconds / 3600
 			write(f" {time}\n")
-			print(f"Off since {time}, after having worked {duration : .8f} hours", end='')
+			print(f"\033[FOff since {time}, after having worked {duration : .8f} hours")
 		
