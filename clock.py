@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import datetime
 from sys import argv
-from os.path import exists
+import os
 
 ACTIVE = True
 TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
@@ -92,11 +92,13 @@ def CLEAR():
 def LOG(file=None, *other_args):
     global LOG_FILE, LOG_LIST
     if file is None:
-        log_file = LOG_FILE
-        LOG_FILE = LOG_LIST = None
-        return True, f"Disconnected from log file {log_file}"
+        if not has_log():
+            return False, "No active log file! Use `log <filename>` to set"
+        return True, open(LOG_FILE).read()
     LOG_FILE = file
-    if not exists(file):
+    if not os.path.exists(os.path.dirname(file)):
+        os.makedirs(os.path.dirname(file))
+    if not os.path.exists(file):
         with open(file, 'w') as writer:
             pass
     read_log(LOG_FILE)
@@ -124,16 +126,38 @@ def EXIT():
     global ACTIVE
     ACTIVE = False
     return True, None
+def HELP():
+    help_string = '''Here are all commands used by my shift clock:
+log: use log <filename> to set the file that will be used to log your times clocking in and out. The filename may not contain spaces.
+The format is human readable and consists of the day, the start time, then the end time (each on a new line) with the days represented as year/month/day, and times represented as hour:minute:second
+The log file can also be selected while running the program using a command line argument:  `python clock.py <filename>`.
+Running log without an argument will print the full log
+
+in/start: This will clock you in. Ensure that you have selected a log file before running this
+out/end: This will clock you out. Ensure that you have selected a log file before running this.
+Simply pressing enter without typing a command will automatically send the appropriate clock in/out command. If you are already clocked in, it will clock you out, and vice-versa.
+
+state: This indicates whether you are clocked in or out.
+report: This totals up hours worked by day and prints out a summary for each day
+total: This totals up all hours worked in your current log file
+
+clear: This clears the screen
+
+exit: This exits the program. Because all hours are logged in your selected file, you can exit the program, even if you are clocked in
+'''
+    return True, help_string
 
 COMMANDS =  {   "start" :   START, 
+                "in"    :   START,
                 "end"   :   END,
+                "out"   :   END,
                 "log"   :   LOG,
                 "clear" :   CLEAR,
                 "state" :   STATE,
                 "total" :   TOTAL,
                 "report":   REPORT,
                 "exit"  :   EXIT,
-
+                "help"  :   HELP,
             }
 
 def RUN_COMMAND(full_command):
@@ -159,11 +183,13 @@ def main():
     #try to get log_file from arguments
     if len(argv) > 1:
         LOG(argv[1])
+
+    print("Welcome to my shift clock! Type help for info")
     
     while ACTIVE:
         command = input('> ')
         if command == "":
-            command = "end" if WORKING else "start"
+            command = "out" if WORKING else "in"
         RUN_COMMAND(command)
 
 
