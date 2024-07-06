@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 import datetime
 from sys import argv
-import os
-
+from pathlib import Path
 ACTIVE = True
 TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
 LOG_LIST = None
@@ -96,11 +95,10 @@ def LOG(file=None, *other_args):
             return False, "No active log file! Use `log <filename>` to set"
         return True, open(LOG_FILE).read()
     LOG_FILE = file
-    if not os.path.exists(os.path.dirname(file)):
-        os.makedirs(os.path.dirname(file))
-    if not os.path.exists(file):
-        with open(file, 'w') as writer:
-            pass
+    path = Path(file)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.exists():
+        path.touch()
     read_log(LOG_FILE)
     return True, f"Now writing to log file {LOG_FILE}"
 def STATE():
