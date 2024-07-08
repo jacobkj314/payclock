@@ -185,7 +185,7 @@ def main():
     print("Welcome to my shift clock! Type help for info")
     
     while ACTIVE:
-        command = input('> ')
+        command = input('> ').strip()
         if command == "":
             command = "out" if WORKING else "in"
         RUN_COMMAND(command)
