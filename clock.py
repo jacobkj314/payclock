@@ -64,7 +64,7 @@ def get_report():
 
 
 
-def START():
+def START(*args):
     global WORKING, LOG_LIST
     if not has_log():
         return False, "No active log file! Use `log <filename>` to set"
@@ -74,7 +74,7 @@ def START():
     dt, date, time = get_date_time()
     write_log(dt=dt, date=date, time=time, is_start=True)
     return True, f"On since {time}"
-def END():
+def END(*args):
     global WORKING
     if not has_log():
         return False, "No active log file! Use `log <filename>` to set"
@@ -86,9 +86,10 @@ def END():
     start_time = LOG_LIST[-1][1]
     duration = (dt - start_time).seconds / 3600
     return True, f"Off since {time}, after having worked {duration : .8f} hours"
-def CLEAR():
+def CLEAR(*args):
     return True, "\033[2J\033[H"
-def LOG(file=None, *other_args):
+def LOG(file_raw=None, *other_args):
+    file = f"logs/{file_raw}"
     global LOG_FILE, LOG_LIST
     if file is None:
         if not has_log():
@@ -100,12 +101,12 @@ def LOG(file=None, *other_args):
     if not path.exists():
         path.touch()
     read_log(LOG_FILE)
-    return True, f"Now writing to log file {LOG_FILE}"
-def STATE():
+    return True, f"Now writing to log file {file_raw}"
+def STATE(*args):
     if not has_log():
         return False, "No active log file! Use `log <filename>` to set"
     return True, f"You are clocked {'in' if WORKING else 'out'}{f' since {LOG_LIST[-1][1 if WORKING else 2].strftime(TIME_FORMAT)}' if len(LOG_LIST) > 0 else ''}"
-def REPORT():
+def REPORT(*args):
     global LOG_LIST
     if not has_log():
         return False, "No active log file! Use `log <filename>` to set"
@@ -113,18 +114,18 @@ def REPORT():
     for date, duration in get_report().items():
         output_list.append(f"{duration} hours worked on date {date}")
     return True, ('\n'.join(output_list) if len(LOG_LIST) > 0 else 'No worked times to report')
-def TOTAL():
+def TOTAL(*args):
     if not has_log():
         return False, "No active log file! Use `log <filename>` to set"
     total = 0.0
     for _, duration in get_report().items():
         total += duration
     return True, f"{total} hours worked since begin of log {LOG_FILE}"
-def EXIT():
+def EXIT(*args):
     global ACTIVE
     ACTIVE = False
     return True, None
-def HELP():
+def HELP(*args):
     help_string = '''Here are all commands used by my shift clock:
 log: use log <filename> to set the file that will be used to log your times clocking in and out. The filename may not contain spaces.
 The format is human readable and consists of the day, the start time, then the end time (each on a new line) with the days represented as year/month/day, and times represented as hour:minute:second
@@ -158,7 +159,10 @@ COMMANDS =  {   "start" :   START,
                 "help"  :   HELP,
             }
 
-def RUN_COMMAND(full_command):
+def RUN_COMMAND(full_command, print=print):
+    full_command = full_command.strip()
+    if full_command == "":
+        return
     command, *args = full_command.split()
     known_command = command in COMMANDS
     output_color = command_color = "31" ; output = f'Unknown command "{command}"'
@@ -172,10 +176,12 @@ def RUN_COMMAND(full_command):
             command_color = output_color = "33"
             command_symbol = "❓"
 
-    print(f"\033[F{command_symbol} \033[{command_color}m{full_command}\033[0m")
+    print(f"{command_symbol} \033[{command_color}m{full_command}\033[0m")
     if output is not None:
         output = output.strip('\n')
         print(f"\033[{output_color}m{output}\033[0m")
+    
+    return output
 
 def main():
     #try to get log_file from arguments
@@ -185,10 +191,18 @@ def main():
     print("Welcome to my shift clock! Type help for info")
     
     while ACTIVE:
-        command = input('> ').strip()
-        if command == "":
-            command = "out" if WORKING else "in"
-        RUN_COMMAND(command)
+        run_line(input('> '))
+
+def run_line(command_raw, print=print):
+    command = command_raw.strip()
+    if command == "":
+        command = "out" if WORKING else "in"
+    commands = command
+    print("\033[F" + ' '*(2+len(command_raw)), end = '\r')
+    outputs = []
+    for command in commands.split(';'):
+        outputs.append(RUN_COMMAND(command, print=print))
+    return outputs
 
 
     
