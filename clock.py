@@ -85,7 +85,7 @@ def END(*args):
     write_log(dt=dt, date=date, time=time, is_start=False)
     start_time = LOG_LIST[-1][1]
     duration = (dt - start_time).seconds / 3600
-    return True, f"Off since {time}, after having worked {duration : .8f} hours"
+    return True, f"Off since {time}, after having worked {duration : .2f} hours"
 def CLEAR(*args):
     return True, "\033[2J\033[H"
 def LOG(file_raw=None, *other_args):
@@ -112,7 +112,7 @@ def REPORT(*args):
         return False, "No active log file! Use `log <filename>` to set"
     output_list = list()
     for date, duration in get_report().items():
-        output_list.append(f"{duration} hours worked on date {date}")
+        output_list.append(f"{duration:.2f} hours worked on date {date}")
     return True, ('\n'.join(output_list) if len(LOG_LIST) > 0 else 'No worked times to report')
 def TOTAL(*args):
     if not has_log():
@@ -120,7 +120,7 @@ def TOTAL(*args):
     total = 0.0
     for _, duration in get_report().items():
         total += duration
-    return True, f"{total} hours worked since begin of log {LOG_FILE}"
+    return True, f"{total:.2f} hours worked since begin of log {LOG_FILE[5:]}"
 def EXIT(*args):
     global ACTIVE
     ACTIVE = False
@@ -164,6 +164,7 @@ def RUN_COMMAND(full_command, print=print):
     if full_command == "":
         return
     command, *args = full_command.split()
+    command = command.lower()
     known_command = command in COMMANDS
     output_color = command_color = "31" ; output = f'Unknown command "{command}"'
     command_symbol = "❌"

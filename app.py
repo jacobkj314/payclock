@@ -2,7 +2,7 @@
 from flask import Flask, request, render_template_string
 
 from clock import run_line
-
+import config
 app = Flask(__name__)
 
 HTML_TEMPLATE = """
@@ -13,39 +13,24 @@ HTML_TEMPLATE = """
   <title>Clock</title>
 </head>
 <body>
-  <form action="/" method="post">
-    <input type="hidden" name="who" value="helen">
-    <input type="hidden" name="which" value="in">
-    <button type="submit">Helen In</button>
-  </form>
-  <form action="/" method="post">
-    <input type="hidden" name="who" value="helen">
-    <input type="hidden" name="which" value="out">
-    <button type="submit">Helen Out</button>
-  </form>
-  <form action="/" method="post">
-    <input type="hidden" name="who" value="helen">
-    <input type="hidden" name="which" value="report">
-    <button type="submit">Helen Report</button>
-  </form>
 
-  <form action="/" method="post">
-    <input type="hidden" name="who" value="amy">
-    <input type="hidden" name="which" value="in">
-    <button type="submit">Amy In</button>
-  </form>
-  <form action="/" method="post">
-    <input type="hidden" name="who" value="amy">
-    <input type="hidden" name="which" value="out">
-    <button type="submit">Amy Out</button>
-  </form>
-  <form action="/" method="post">
-    <input type="hidden" name="who" value="amy">
-    <input type="hidden" name="which" value="report">
-    <button type="submit">Amy Report</button>
-  </form>
+  <h1> {{ name }} Clock Tracker </h1>
 
-  {{ output }}
+  {% for whoitem in who %}
+    {% for whichitem in which %}
+      <form action="/" method="post" style="display:inline">
+        <input type="hidden" name="who" value="{{ whoitem }}">
+        <input type="hidden" name="which" value="{{ whichitem }}">
+        <button type="submit">{{ whoitem }} {{ whichitem }}</button>
+      </form>
+    {% endfor %}
+    <br/>
+  {% endfor %}
+  
+  <pre>
+{{ output }}
+  </pre>
+
 </body>
 </html>
 """
@@ -57,9 +42,9 @@ def index():
 
     output = ""
     if request.method == "POST":
-        output = run_line(f"log {who} ; {which} ; exit")[-2]
+        output = run_line(f"log {who} ; {which} ; exit", print = lambda *args, **kwargs : None)[-2]
 
-    return render_template_string(HTML_TEMPLATE, output=output)
+    return render_template_string(HTML_TEMPLATE, output=output, who=config.who, which=config.which, name=config.name)
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0")
