@@ -40,7 +40,7 @@ HTML_TEMPLATE = """
     <button type="submit">Amy Out</button>
   </form>
   <form action="/" method="post">
-    <input type="hidden" name="who" value="helen">
+    <input type="hidden" name="who" value="amy">
     <input type="hidden" name="which" value="report">
     <button type="submit">Amy Report</button>
   </form>
