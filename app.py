@@ -14,12 +14,19 @@ HTML_TEMPLATE = """
 
   <style>
     body {
-      font-size: 3.5em;
+      font-size: 2em;
     }
 
     button, input, select, textarea {
      font-size: inherit;
     }
+
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse; /* ensures borders don't double up */
+      padding: 8px;
+    }
+
   </style>
 
 </head>
@@ -28,16 +35,21 @@ HTML_TEMPLATE = """
 
   <h1> {{ name }} Clock Tracker </h1>
 
+  <table>
   {% for whoitem in who %}
+    <tr>
     {% for whichitem in which %}
-      <form action="/" method="post" style="display:inline">
-        <input type="hidden" name="who" value="{{ whoitem }}">
-        <input type="hidden" name="which" value="{{ whichitem }}">
-        <button type="submit">{{ whoitem }} {{ whichitem }}</button>
-      </form>
+      <td>
+        <form action="/" method="post" style="display:inline">
+          <input type="hidden" name="who" value="{{ whoitem }}">
+          <input type="hidden" name="which" value="{{ whichitem }}">
+          <button type="submit">{{ whoitem }} {{ whichitem }}</button>
+        </form>
+      </td>
     {% endfor %}
-    <br/>
+    <tr/>
   {% endfor %}
+  </table>
   
   <pre>
 {{ output }}
