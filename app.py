@@ -11,8 +11,20 @@ HTML_TEMPLATE = """
 <head>
   <meta charset="utf-8">
   <title>Clock</title>
+
+  <style>
+    body {
+      font-size: 3.5em;
+    }
+
+    button, input, select, textarea {
+     font-size: inherit;
+    }
+  </style>
+
 </head>
 <body>
+
 
   <h1> {{ name }} Clock Tracker </h1>
 
